@@ -9,7 +9,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>frontend push test</Text>
+      <Text>gitignore test</Text>
     </View>
   );
 }

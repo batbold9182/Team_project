@@ -1,5 +1,6 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
+# test gitignore
+ignoretest.tsx
 # dependencies
 node_modules/
 
