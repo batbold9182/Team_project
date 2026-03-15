@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import * as Linking from "expo-linking";
 import {
   Alert,
+  Platform,
   SafeAreaView,
+  ScrollView,
+  Share,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -155,10 +159,45 @@ export default function WhiteboardRoomScreen() {
     socketRef.current?.emit("board:clear");
   }
 
+  async function handleInvite() {
+    const roomPath = `/whiteboard/${encodeURIComponent(safeRoomId)}`;
+    const inviteLink =
+      Platform.OS === "web" && typeof window !== "undefined"
+        ? window.location.href
+        : Linking.createURL(roomPath);
+
+    try {
+      if (Platform.OS === "web") {
+        if (typeof navigator !== "undefined" && navigator.share) {
+          await navigator.share({
+            title: `Whiteboard room ${safeRoomId}`,
+            text: `Join my whiteboard room: ${safeRoomId}`,
+            url: inviteLink,
+          });
+          return;
+        }
+
+        if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(inviteLink);
+          Alert.alert("Invite link copied", inviteLink);
+          return;
+        }
+      }
+
+      await Share.share({
+        title: `Whiteboard room ${safeRoomId}`,
+        message: `Join my whiteboard room: ${inviteLink}`,
+        url: inviteLink,
+      });
+    } catch {
+      Alert.alert("Invite link", inviteLink);
+    }
+  }
+
   const isWide = width >= 980;
 
-  return (
-    <SafeAreaView style={styles.screen}>
+  const sharedContent = (
+    <>
       <View style={styles.header}>
         <View>
           <Text style={styles.eyebrow}>Room {safeRoomId}</Text>
@@ -176,6 +215,7 @@ export default function WhiteboardRoomScreen() {
         selectedSize={selectedSize}
         onSelectColor={setSelectedColor}
         onSelectSize={setSelectedSize}
+        onInvite={handleInvite}
         onClear={handleClearBoard}
       />
 
@@ -197,6 +237,18 @@ export default function WhiteboardRoomScreen() {
           onSendMessage={handleSendMessage}
         />
       </View>
+    </>
+  );
+
+  return (
+    <SafeAreaView style={styles.screen}>
+      {isWide ? (
+        sharedContent
+      ) : (
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {sharedContent}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -207,6 +259,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4efe6",
     padding: 16,
     gap: 12,
+  },
+  scrollContent: {
+    gap: 12,
+    paddingBottom: 24,
   },
   header: {
     flexDirection: "row",
@@ -252,10 +308,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   content: {
-    flex: 1,
     gap: 12,
   },
   contentWide: {
+    flex: 1,
     flexDirection: "row",
   },
   contentStacked: {

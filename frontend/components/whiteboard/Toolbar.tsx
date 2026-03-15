@@ -9,6 +9,7 @@ type ToolbarProps = {
   selectedSize: number;
   onSelectColor: (color: string) => void;
   onSelectSize: (size: number) => void;
+  onInvite: () => void;
   onClear: () => void;
 };
 
@@ -18,6 +19,7 @@ export function Toolbar({
   selectedSize,
   onSelectColor,
   onSelectSize,
+  onInvite,
   onClear,
 }: ToolbarProps) {
   return (
@@ -56,9 +58,14 @@ export function Toolbar({
         </View>
       </View>
 
-      <Pressable style={[styles.clearButton, !isConnected ? styles.clearButtonMuted : null]} onPress={onClear}>
-        <Text style={styles.clearButtonText}>Clear board</Text>
-      </Pressable>
+      <View style={styles.actionsRow}>
+        <Pressable style={styles.inviteButton} onPress={onInvite}>
+          <Text style={styles.inviteButtonText}>Invite</Text>
+        </Pressable>
+        <Pressable style={[styles.clearButton, !isConnected ? styles.clearButtonMuted : null]} onPress={onClear}>
+          <Text style={styles.clearButtonText}>Clear board</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -85,6 +92,11 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 8,
   },
+  actionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
   colorChip: {
     width: 30,
     height: 30,
@@ -109,6 +121,17 @@ const styles = StyleSheet.create({
   },
   sizeTextSelected: {
     color: "#ffffff",
+  },
+  inviteButton: {
+    alignSelf: "flex-start",
+    borderRadius: 999,
+    backgroundColor: "#2563eb",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  inviteButtonText: {
+    color: "#ffffff",
+    fontWeight: "800",
   },
   clearButton: {
     alignSelf: "flex-start",

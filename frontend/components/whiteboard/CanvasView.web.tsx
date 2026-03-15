@@ -1,5 +1,6 @@
 import { createElement, useState } from "react";
 import { PanResponder, StyleSheet, Text, View } from "react-native";
+import type { TextStyle, ViewStyle } from "react-native";
 
 import type { Point, Stroke } from "@/types/whiteboard";
 
@@ -45,6 +46,11 @@ export function CanvasView({
   onStrokeEnd,
 }: CanvasViewProps) {
   const [boardSize, setBoardSize] = useState({ width: 1, height: 1 });
+  const svgStyle = {
+    width: "100%",
+    height: "100%",
+    display: "block" as const,
+  };
 
   function clampPoint(x: number, y: number) {
     return {
@@ -95,7 +101,7 @@ export function CanvasView({
           {
             viewBox: `0 0 ${boardSize.width} ${boardSize.height}`,
             preserveAspectRatio: "none",
-            style: styles.svg,
+            style: svgStyle,
           },
           strokes.map(renderStroke),
           draftStroke ? renderStroke(draftStroke) : null
@@ -107,7 +113,12 @@ export function CanvasView({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{
+  wrapper: ViewStyle;
+  board: ViewStyle;
+  gestureLayer: ViewStyle;
+  hint: TextStyle;
+}>({
   wrapper: {
     flex: 1,
     minHeight: 360,
@@ -122,11 +133,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#eadfce",
     position: "relative",
-  },
-  svg: {
-    width: "100%",
-    height: "100%",
-    display: "block",
   },
   gestureLayer: {
     ...StyleSheet.absoluteFillObject,
