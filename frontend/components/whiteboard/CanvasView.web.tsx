@@ -9,11 +9,11 @@ type CanvasViewProps = {
   draftPoints: Point[];
   selectedColor: string;
   selectedSize: number;
+  cursors: Record<string, { x: number; y: number; userName: string }>;
   onStrokeStart: (point: Point) => void;
   onStrokeMove: (point: Point) => void;
   onStrokeEnd: () => void;
 };
-
 function buildPath(points: Point[]) {
   if (points.length === 0) {
     return "";
@@ -41,6 +41,7 @@ export function CanvasView({
   draftPoints,
   selectedColor,
   selectedSize,
+  cursors = {},
   onStrokeStart,
   onStrokeMove,
   onStrokeEnd,
@@ -107,6 +108,24 @@ export function CanvasView({
           draftStroke ? renderStroke(draftStroke) : null
         )}
         <View style={styles.gestureLayer} {...panResponder.panHandlers} />
+        {Object.values(cursors).map((cursor: any, index) => (
+  <View
+    key={index}
+    style={{
+      position: "absolute",
+      left: cursor.x - 10,
+      top: cursor.y - 10,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: "red",
+      borderWidth: 2,
+      borderColor: "black",
+      zIndex: 999,
+      pointerEvents: "none",
+    }}
+  />
+))}
       </View>
       <Text style={styles.hint}>Web fallback uses SVG rendering. Native keeps Skia.</Text>
     </View>

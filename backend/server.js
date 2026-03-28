@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect Database
-connectDB();
+//connectDB();
 
 app.get("/", (req, res) => res.send("API check ajilj baina"));
 app.use("/api/rooms", roomsRouter);

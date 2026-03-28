@@ -28,12 +28,14 @@ export default function WhiteboardRoomScreen() {
   const [draftPoints, setDraftPoints] = useState<Point[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [cursors, setCursors] = useState<Record<string, { x: number; y: number; userName: string }>>({});
   const [messageText, setMessageText] = useState("");
   const [selectedColor, setSelectedColor] = useState("#111827");
   const [selectedSize, setSelectedSize] = useState(4);
   const [isConnected, setIsConnected] = useState(false);
   const [userName] = useState(() => `Guest-${Math.floor(Math.random() * 900 + 100)}`);
   const socketRef = useRef<ReturnType<typeof createWhiteboardSocket> | null>(null);
+  const [redoStack, setRedoStack] = useState<Stroke[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -99,9 +101,16 @@ export default function WhiteboardRoomScreen() {
       setMessages((current) => [...current, message]);
     });
 
-    socket.on("presence:update", (nextParticipants: Participant[]) => {
-      setParticipants(nextParticipants || []);
-    });
+  socket.on("presence:update", (nextParticipants: Participant[]) => {
+  setParticipants(nextParticipants || []);
+});
+
+socket.on("cursor:move", (cursor) => {
+  setCursors((prev) => ({
+    ...prev,
+    [cursor.socketId]: cursor,
+  }));
+});
 
     socket.on("board:cleared", () => {
       setDraftPoints([]);
@@ -118,10 +127,14 @@ export default function WhiteboardRoomScreen() {
     setDraftPoints([point]);
   }
 
-  function handleStrokeMove(point: Point) {
-    setDraftPoints((current) => [...current, point]);
-  }
+function handleStrokeMove(point: Point) {
+  setDraftPoints((current) => [...current, point]);
 
+  socketRef.current?.emit("cursor:move", {
+    x: point.x,
+    y: point.y,
+  });
+}
   function handleStrokeEnd() {
     if (draftPoints.length < 2) {
       setDraftPoints([]);
@@ -221,14 +234,15 @@ export default function WhiteboardRoomScreen() {
 
       <View style={[styles.content, isWide ? styles.contentWide : styles.contentStacked]}>
         <CanvasView
-          strokes={strokes}
-          draftPoints={draftPoints}
-          selectedColor={selectedColor}
-          selectedSize={selectedSize}
-          onStrokeStart={handleStrokeStart}
-          onStrokeMove={handleStrokeMove}
-          onStrokeEnd={handleStrokeEnd}
-        />
+  strokes={strokes}
+  draftPoints={draftPoints}
+  selectedColor={selectedColor}
+  selectedSize={selectedSize}
+  cursors={cursors}
+  onStrokeStart={handleStrokeStart}
+  onStrokeMove={handleStrokeMove}
+  onStrokeEnd={handleStrokeEnd}
+/>
         <ChatSidebar
           participants={participants}
           messages={messages}

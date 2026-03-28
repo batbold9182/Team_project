@@ -24,6 +24,23 @@ function sanitizePoints(points) {
 
 function registerWhiteboardHandlers(io) {
   io.on("connection", (socket) => {
+    socket.on("cursor:move", (payload = {}) => {
+  const roomId = socket.data.roomId;
+
+  if (!roomId) return;
+
+  const x = Number(payload.x);
+  const y = Number(payload.y);
+
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+  socket.to(roomId).emit("cursor:move", {
+    socketId: socket.id,
+    userName: socket.data.userName || "Guest",
+    x,
+    y,
+  });
+});
     console.log(`socket connected ${socket.id}`);
 
     socket.on("room:join", (payload = {}, callback) => {

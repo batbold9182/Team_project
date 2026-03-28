@@ -10,6 +10,7 @@ type CanvasViewProps = {
   draftPoints: Point[];
   selectedColor: string;
   selectedSize: number;
+  cursors: Record<string, { x: number; y: number; userName: string }>;
   onStrokeStart: (point: Point) => void;
   onStrokeMove: (point: Point) => void;
   onStrokeEnd: () => void;
@@ -30,6 +31,7 @@ export function CanvasView({
   draftPoints,
   selectedColor,
   selectedSize,
+  cursors = {},
   onStrokeStart,
   onStrokeMove,
   onStrokeEnd,
@@ -69,6 +71,7 @@ export function CanvasView({
         }}
       >
         <Svg
+        
           viewBox={`0 0 ${boardSize.width} ${boardSize.height}`}
           preserveAspectRatio="none"
           style={styles.canvas}
@@ -94,8 +97,27 @@ export function CanvasView({
               strokeJoin="round"
             />
           ) : null}
-        </Svg>
+        </Svg> 
+   
+        
         <View style={styles.gestureLayer} {...panResponder.panHandlers} />
+        {Object.values(cursors).map((cursor, index) => (
+  <View
+    key={index}
+    style={{
+      position: "absolute",
+      left: cursor.x - 10,
+      top: cursor.y - 10,
+      backgroundColor: "red",
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: "black",
+      zIndex: 999, // IMPORTANT
+    }}
+  />
+))}
       </View>
       <Text style={styles.hint}>Expo Go-safe renderer active. Replace with Skia later if you move to a custom dev client.</Text>
     </View>
