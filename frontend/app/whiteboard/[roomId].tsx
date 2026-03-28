@@ -116,6 +116,12 @@ socket.on("cursor:move", (cursor) => {
       setDraftPoints([]);
       setStrokes([]);
     });
+    socket.on("board:undo", () => {
+  setStrokes((current) => {
+    if (current.length === 0) return current;
+    return current.slice(0, -1);
+  });
+});
 
     return () => {
       socket.disconnect();
@@ -150,9 +156,10 @@ function handleStrokeMove(point: Point) {
       createdAt: new Date().toISOString(),
     };
 
-    setStrokes((current) => [...current, stroke]);
-    socketRef.current?.emit("draw:stroke", stroke);
-    setDraftPoints([]);
+   setStrokes((current) => [...current, stroke]);
+   socketRef.current?.emit("draw:stroke", stroke);
+   setDraftPoints([]);
+   setRedoStack([]); // 🔥 CLEAR redo history
   }
 
   function handleSendMessage() {
@@ -206,6 +213,37 @@ function handleStrokeMove(point: Point) {
       Alert.alert("Invite link", inviteLink);
     }
   }
+  function handleUndo() {
+  setStrokes((current) => {
+    if (current.length === 0) return current;
+
+    const newStrokes = [...current];
+    const last = newStrokes.pop();
+
+    if (last) {
+      setRedoStack((prev) => [...prev, last]);
+    }
+
+    return newStrokes;
+  });
+
+  socketRef.current?.emit("board:undo");
+}
+  function handleRedo() {
+  setRedoStack((current) => {
+    if (current.length === 0) return current;
+
+    const newRedo = [...current];
+    const stroke = newRedo.pop();
+
+    if (stroke) {
+      setStrokes((prev) => [...prev, stroke]);
+      socketRef.current?.emit("draw:stroke", stroke);
+    }
+
+    return newRedo;
+  });
+}
 
   const isWide = width >= 980;
 
@@ -230,6 +268,8 @@ function handleStrokeMove(point: Point) {
         onSelectSize={setSelectedSize}
         onInvite={handleInvite}
         onClear={handleClearBoard}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
       />
 
       <View style={[styles.content, isWide ? styles.contentWide : styles.contentStacked]}>

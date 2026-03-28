@@ -156,6 +156,18 @@ function registerWhiteboardHandlers(io) {
         io.to(roomId).emit("presence:update", roomState.participants);
       }
     });
+    socket.on("board:undo", () => {
+  const roomId = socket.data.roomId;
+  if (!roomId) return;
+
+  const room = getRoom(roomId);
+
+  if (room.strokes.length > 0) {
+    room.strokes.pop();
+  }
+
+  io.to(roomId).emit("board:undo");
+});
   });
 }
 

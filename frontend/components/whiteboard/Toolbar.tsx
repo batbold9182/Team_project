@@ -11,6 +11,8 @@ type ToolbarProps = {
   onSelectSize: (size: number) => void;
   onInvite: () => void;
   onClear: () => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
 };
 
 export function Toolbar({
@@ -21,6 +23,8 @@ export function Toolbar({
   onSelectSize,
   onInvite,
   onClear,
+  onUndo,
+  onRedo,
 }: ToolbarProps) {
   return (
     <View style={styles.toolbar}>
@@ -39,6 +43,9 @@ export function Toolbar({
             />
           ))}
         </View>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+
+</View>
       </View>
 
       <View style={styles.group}>
@@ -65,8 +72,21 @@ export function Toolbar({
         <Pressable style={[styles.clearButton, !isConnected ? styles.clearButtonMuted : null]} onPress={onClear}>
           <Text style={styles.clearButtonText}>Clear board</Text>
         </Pressable>
+          <Pressable style={styles.undoButton} onPress={onUndo}>
+    <Text style={styles.undoText}>↩</Text>
+  </Pressable>
+
+  <Pressable style={styles.redoButton} onPress={onRedo}>
+    <Text style={styles.redoText}>↪</Text>
+  </Pressable>
       </View>
+      <View style={styles.undoRedoRow}>
+
+  
+</View>
     </View>
+    
+    
   );
 }
 
@@ -147,4 +167,33 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontWeight: "800",
   },
+  undoRedoRow: {
+  flexDirection: "row",
+  gap: 10,
+  marginTop: 10,
+},
+
+undoButton: {
+  backgroundColor: "#e0e7ff", // soft blue
+  paddingHorizontal: 14,
+  paddingVertical: 10,
+  borderRadius: 999,
+},
+
+redoButton: {
+  backgroundColor: "#fef3c7", // soft yellow
+  paddingHorizontal: 14,
+  paddingVertical: 10,
+  borderRadius: 999,
+},
+
+undoText: {
+  color: "#1e3a8a",
+  fontWeight: "700",
+},
+
+redoText: {
+  color: "#92400e",
+  fontWeight: "700",
+},
 });
